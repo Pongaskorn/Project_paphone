@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ cfg.title }} - PhoneFix{% endblock %}
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-4 py-10">
+  <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 border border-gray-100">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 {% if cfg.staff %}bg-gray-100 text-gray-900{% else %}bg-red-100 text-red-600{% endif %}">
+        <i data-lucide="{{ cfg.icon }}" class="w-8 h-8"></i>
+      </div>
+      <h1 class="text-2xl font-extrabold text-gray-900">{{ cfg.title }}</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ cfg.subtitle }}</p>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}
+        <div class="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
+          {% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div>
+        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1 ml-1">{{ form.username.label }}</label>
+        {{ form.username }}
+      </div>
+      <div>
+        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1 ml-1">{{ form.password.label }}</label>
+        {{ form.password }}
+      </div>
+      <button type="submit" class="w-full text-white py-3.5 rounded-xl font-bold text-lg transition shadow-lg {% if cfg.staff %}bg-gray-900 hover:bg-gray-800{% else %}bg-red-600 hover:bg-red-700 shadow-red-200{% endif %}">
+        เข้าสู่ระบบ
+      </button>
+    </form>
+
+    <div class="mt-6 pt-5 border-t border-gray-100 text-center text-sm text-gray-500 space-y-2">
+      {% if not cfg.staff %}
+        <p>ยังไม่มีบัญชี? <a href="{% url 'accounts:register' %}" class="text-red-600 font-bold hover:underline">สมัครสมาชิก</a></p>
+        <p class="text-xs"><a href="{% url 'accounts:tech_login' %}" class="hover:text-red-600">สำหรับช่าง</a> · <a href="{% url 'accounts:admin_login' %}" class="hover:text-red-600">ผู้ดูแลระบบ / เจ้าของร้าน</a></p>
+      {% else %}
+        <p class="text-xs">
+          <a href="{% url 'accounts:login' %}" class="hover:text-red-600">หน้าสมาชิก</a> ·
+          <a href="{% url 'accounts:tech_login' %}" class="hover:text-red-600">ช่าง</a> ·
+          <a href="{% url 'accounts:admin_login' %}" class="hover:text-red-600">ผู้ดูแลระบบ / เจ้าของร้าน</a>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

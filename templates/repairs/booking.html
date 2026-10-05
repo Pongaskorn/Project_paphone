@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}แจ้งซ่อมออนไลน์ - PhoneFix{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <i data-lucide="wrench" class="w-6 h-6 text-red-600"></i> แจ้งซ่อมออนไลน์
+    </h2>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.customer_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">ชื่อของคุณ</label>
+          {{ form.customer_name }}
+          {% for e in form.customer_name.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+        </div>
+        <div>
+          <label for="{{ form.customer_phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+          {{ form.customer_phone }}
+          {% for e in form.customer_phone.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ form.device_model.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">รุ่นมือถือ</label>
+        {{ form.device_model }}
+        {% for e in form.device_model.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+
+      <div>
+        <label for="{{ form.symptom.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">อาการเสีย</label>
+        {{ form.symptom }}
+        {% for e in form.symptom.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+
+      <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition flex justify-center items-center gap-2 mt-4">
+        <i data-lucide="save" class="w-5 h-5"></i> ยืนยันการแจ้งซ่อม
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

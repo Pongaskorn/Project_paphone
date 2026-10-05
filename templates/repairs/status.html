@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}สถานะงานซ่อม - PhoneFix{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+      <i data-lucide="clock" class="w-6 h-6 text-red-600"></i> สถานะงานซ่อมของคุณ
+    </h2>
+    <a href="{% url 'repairs:new' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 transition">+ แจ้งซ่อมใหม่</a>
+  </div>
+
+  {% if not tickets %}
+    <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
+      <div class="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="search" class="w-8 h-8 text-gray-400"></i>
+      </div>
+      <h3 class="text-gray-900 font-bold mb-1">ไม่พบประวัติการซ่อม</h3>
+      <p class="text-gray-500 text-sm">คุณยังไม่มีรายการแจ้งซ่อม</p>
+    </div>
+  {% else %}
+    <div class="space-y-4">
+      {% for t in tickets %}
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <span class="font-bold text-lg text-gray-900">{{ t.device_model }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-bold {{ t.badge_class }}">{{ t.get_status_display }}</span>
+          </div>
+          <p class="text-gray-600 text-sm">{{ t.symptom }}</p>
+          <p class="text-gray-400 text-xs mt-1">รหัส: {{ t.ticket_code }} · วันที่: {{ t.created_at|thai_date }}</p>
+        </div>
+        <div class="w-full md:w-32 bg-gray-100 h-2 rounded-full overflow-hidden">
+          <div class="h-full {{ t.bar_class }}" style="width: {{ t.progress }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

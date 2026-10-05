@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}จัดการงานซ่อม - PAPhone{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+      <div class="bg-red-600 text-white p-2 rounded"><i data-lucide="wrench" class="w-6 h-6"></i></div>
+      รายการแจ้งซ่อมทั้งหมด
+    </h2>
+    <a href="{% url 'tech:create' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 transition">+ เพิ่มงานซ่อม</a>
+  </div>
+
+  <div class="flex overflow-x-auto gap-2 pb-2 mb-4 no-scrollbar">
+    <a href="{% url 'dashboard:manage' %}"
+       class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition {% if not current %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+      ทั้งหมด ({{ total }})
+    </a>
+    {% for s in stats %}
+      <a href="?status={{ s.value }}"
+         class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition {% if current == s.value %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+        {{ s.label }} ({{ s.count }})
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="p-4 font-semibold text-gray-600">วันที่</th>
+            <th class="p-4 font-semibold text-gray-600">ลูกค้า</th>
+            <th class="p-4 font-semibold text-gray-600">อุปกรณ์/อาการ</th>
+            <th class="p-4 font-semibold text-gray-600">สถานะ</th>
+            <th class="p-4 font-semibold text-gray-600 text-right">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for t in tickets %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-4 text-sm text-gray-500 whitespace-nowrap">
+              {{ t.created_at|thai_date:"time" }}
+              <div class="text-xs text-gray-400">{{ t.ticket_code }}</div>
+            </td>
+            <td class="p-4">
+              <div class="font-medium text-gray-900">{{ t.customer_name }}</div>
+              <div class="text-sm text-gray-500">{{ t.customer_phone }}</div>
+            </td>
+            <td class="p-4">
+              <div class="font-bold text-gray-800">{{ t.device_model }}</div>
+              <div class="text-sm text-gray-600 truncate max-w-xs" title="{{ t.symptom }}">{{ t.symptom }}</div>
+              {% if t.note %}<div class="text-xs text-amber-700 truncate max-w-xs mt-0.5" title="{{ t.note }}">📝 {{ t.note }}</div>{% endif %}
+            </td>
+            <td class="p-4">
+              <form method="post" action="{% url 'dashboard:update_status' t.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select name="status" onchange="this.form.submit()"
+                        class="p-2 rounded-lg text-sm font-semibold border-none cursor-pointer outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-300 {{ t.badge_class }}">
+                  {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if t.status == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+            </td>
+            <td class="p-4 text-right whitespace-nowrap">
+              <a href="{% url 'tech:detail' t.pk %}" class="inline-block text-sm font-bold text-red-600 hover:underline mr-2">รายละเอียด</a>
+              <form method="post" action="{% url 'dashboard:delete' t.pk %}" class="inline" onsubmit="return confirm('ต้องการลบข้อมูลนี้ใช่หรือไม่?')">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="text-gray-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition align-middle" title="ลบรายการ">
+                  <i data-lucide="trash-2" class="w-[18px] h-[18px]"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="p-8 text-center text-gray-500">ไม่มีรายการซ่อมในขณะนี้</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

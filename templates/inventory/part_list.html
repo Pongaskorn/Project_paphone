@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}สต็อกอะไหล่ - PAPhone{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+      <div class="bg-red-600 text-white p-2 rounded"><i data-lucide="package" class="w-6 h-6"></i></div>
+      สต็อกอะไหล่
+    </h2>
+    {% if is_manager %}
+      <a href="{% url 'inventory:create' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 transition">+ เพิ่มอะไหล่</a>
+    {% endif %}
+  </div>
+
+  <!-- สรุป -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="bg-white rounded-xl border border-gray-100 p-4">
+      <div class="text-xs text-gray-400">รายการอะไหล่</div>
+      <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+    </div>
+    <a href="?low=1" class="bg-white rounded-xl border border-amber-200 p-4 hover:shadow-md transition">
+      <div class="text-xs text-amber-700">ใกล้หมด</div>
+      <div class="text-2xl font-bold text-amber-700">{{ stats.low }}</div>
+    </a>
+    <a href="?low=1" class="bg-white rounded-xl border border-red-200 p-4 hover:shadow-md transition">
+      <div class="text-xs text-red-600">หมดสต็อก</div>
+      <div class="text-2xl font-bold text-red-600">{{ stats.out }}</div>
+    </a>
+    {% if is_manager %}
+    <div class="bg-white rounded-xl border border-gray-100 p-4">
+      <div class="text-xs text-gray-400">มูลค่าสต็อก (ราคาทุน)</div>
+      <div class="text-2xl font-bold text-gray-900">฿{{ stats.value|default:0|floatformat:"0g" }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ค้นหา/กรอง -->
+  <form method="get" class="mb-4 flex flex-wrap gap-2">
+    <input type="text" name="q" value="{{ q }}" placeholder="ค้นหา รหัส / ชื่อ / รุ่นที่ใช้ได้"
+           class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 outline-none transition">
+    <select name="cat" class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white outline-none focus:ring-2 focus:ring-red-500">
+      <option value="">ทุกหมวด</option>
+      {% for value, label in categories %}<option value="{{ value }}" {% if cat == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <label class="flex items-center gap-2 px-3 text-sm text-gray-600"><input type="checkbox" name="low" value="1" {% if low %}checked{% endif %}> เฉพาะใกล้หมด/หมด</label>
+    {% if archived %}<input type="hidden" name="archived" value="1">{% endif %}
+    <button type="submit" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition"><i data-lucide="search" class="w-[18px] h-[18px]"></i></button>
+  </form>
+
+  {% if archived %}<p class="mb-3 text-sm text-gray-500">กำลังดูอะไหล่ที่ปิดใช้งาน · <a class="text-red-600 font-bold" href="{% url 'inventory:list' %}">กลับ</a></p>{% endif %}
+
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="p-4 font-semibold text-gray-600">อะไหล่</th>
+            <th class="p-4 font-semibold text-gray-600">รุ่นที่ใช้ได้</th>
+            <th class="p-4 font-semibold text-gray-600">ตำแหน่ง</th>
+            <th class="p-4 font-semibold text-gray-600 text-right">ราคาขาย</th>
+            <th class="p-4 font-semibold text-gray-600 text-center">คงเหลือ</th>
+            <th class="p-4"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for p in page %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-4">
+              <div class="font-bold text-gray-900">{{ p.name }}</div>
+              <div class="text-xs text-gray-400">{{ p.sku }} · {{ p.get_category_display }}</div>
+            </td>
+            <td class="p-4 text-sm text-gray-600">{{ p.compatible_models|default:"-" }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ p.location|default:"-" }}</td>
+            <td class="p-4 text-sm text-right whitespace-nowrap">฿{{ p.sell_price|floatformat:"2g" }}</td>
+            <td class="p-4 text-center whitespace-nowrap">
+              <span class="font-bold text-lg text-gray-900">{{ p.quantity }}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-bold ml-1 {{ p.stock_badge }}">{{ p.stock_label }}</span>
+            </td>
+            <td class="p-4 text-right"><a href="{% url 'inventory:detail' p.pk %}" class="text-sm font-bold text-red-600 hover:underline">รายละเอียด</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="p-8 text-center text-gray-500">ไม่พบอะไหล่</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if page.paginator.num_pages > 1 %}
+  <div class="flex justify-center items-center gap-4 mt-4 text-sm">
+    {% if page.has_previous %}<a class="text-red-600 font-bold" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.previous_page_number }}">← ก่อนหน้า</a>{% endif %}
+    <span class="text-gray-500">หน้า {{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="text-red-600 font-bold" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.next_page_number }}">ถัดไป →</a>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if is_manager and not archived %}
+    <p class="mt-6 text-xs text-gray-400"><a class="hover:text-red-600" href="?archived=1">ดูอะไหล่ที่ปิดใช้งาน</a></p>
+  {% endif %}
+</div>
+{% endblock %}

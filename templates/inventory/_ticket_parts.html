@@ -1,0 +1,33 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+  <h3 class="font-bold text-gray-900 mb-1 flex items-center gap-2"><i data-lucide="package" class="w-5 h-5 text-red-600"></i> อะไหล่ที่ใช้ในงานนี้</h3>
+  <p class="text-gray-500 text-xs mb-4">เมื่อเพิ่มอะไหล่ ระบบจะตัดสต็อกให้อัตโนมัติ</p>
+
+  {% for u in ticket_parts %}
+    <div class="flex items-center justify-between gap-3 py-2 {% if not forloop.last %}border-b border-gray-100{% endif %}">
+      <div class="text-sm min-w-0">
+        <a href="{% url 'inventory:detail' u.part.pk %}" class="font-medium text-gray-900 hover:text-red-600">{{ u.part.name }}</a>
+        <div class="text-xs text-gray-400">{{ u.part.sku }} · {{ u.quantity }} × ฿{{ u.unit_price|floatformat:"2g" }}</div>
+      </div>
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <span class="font-bold text-sm">฿{{ u.total|floatformat:"2g" }}</span>
+        <form method="post" action="{% url 'inventory:ticket_remove_part' ticket.pk u.pk %}" onsubmit="return confirm('เอาอะไหล่นี้ออกและคืนเข้าสต็อก?')">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-400 hover:text-red-600 p-1" title="เอาออก/คืนสต็อก"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-sm text-gray-400 mb-2">ยังไม่ได้ใช้อะไหล่</p>
+  {% endfor %}
+
+  {% if ticket_parts %}
+    <div class="flex justify-between border-t border-gray-200 mt-2 pt-3 text-sm font-bold"><span>รวมค่าอะไหล่</span><span>฿{{ parts_total|floatformat:"2g" }}</span></div>
+  {% endif %}
+
+  <form method="post" action="{% url 'inventory:ticket_add_part' ticket.pk %}" class="mt-4 flex flex-col sm:flex-row gap-2">
+    {% csrf_token %}
+    <div class="flex-1">{{ parts_form.part }}</div>
+    <div class="w-24">{{ parts_form.quantity }}</div>
+    <button type="submit" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition whitespace-nowrap">+ ใช้อะไหล่</button>
+  </form>
+</div>

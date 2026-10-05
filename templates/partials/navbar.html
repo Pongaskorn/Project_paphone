@@ -1,0 +1,103 @@
+{% with view=request.resolver_match.view_name %}
+<nav class="bg-white shadow-md fixed w-full top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex justify-between items-center h-20">
+      <a href="{% url 'home' %}" class="flex items-center gap-2">
+        <div class="bg-red-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-6 h-6"></i></div>
+        <span class="text-2xl font-bold text-gray-800 tracking-tight">PA<span class="text-red-600">Phone</span></span>
+      </a>
+
+      <!-- Desktop -->
+      <div class="hidden md:flex items-center space-x-6">
+        {% if user.is_authenticated and user.role != "user" %}
+          <!-- เมนูพนักงาน -->
+          <span class="px-3 py-1 bg-gray-900 text-white text-xs rounded-full">{{ user.get_role_display }}</span>
+          {% if user.role == "technician" %}
+            <a href="{% url 'tech:dashboard' %}" class="font-medium hover:text-red-600 transition {% if view == 'tech:dashboard' %}text-red-600{% else %}text-gray-600{% endif %}">งานซ่อม</a>
+          {% else %}
+            <a href="{% url 'dashboard:manage' %}" class="font-medium hover:text-red-600 transition {% if view == 'dashboard:manage' %}text-red-600{% else %}text-gray-600{% endif %}">จัดการงานซ่อม</a>
+            <a href="{% url 'tech:dashboard' %}" class="font-medium hover:text-red-600 transition {% if view == 'tech:dashboard' %}text-red-600{% else %}text-gray-600{% endif %}">มุมมองช่าง</a>
+          {% endif %}
+          <a href="{% url 'inventory:list' %}" class="font-medium hover:text-red-600 transition {% if view|slice:":10" == 'inventory:' %}text-red-600{% else %}text-gray-600{% endif %}">สต็อกอะไหล่</a>
+          <a href="{% url 'tech:notifications' %}" class="relative text-gray-600 hover:text-red-600 transition" title="แจ้งเตือน">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+            {% if unread_count %}<span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ unread_count }}</span>{% endif %}
+          </a>
+        {% else %}
+          <a href="{% url 'home' %}" class="font-medium hover:text-red-600 transition {% if view == 'home' %}text-red-600{% else %}text-gray-600{% endif %}">หน้าหลัก</a>
+          <a href="{% url 'shop:list' %}" class="font-medium hover:text-red-600 transition flex items-center gap-1 {% if view == 'shop:list' %}text-red-600{% else %}text-gray-600{% endif %}">
+            <i data-lucide="shopping-bag" class="w-[18px] h-[18px]"></i> สินค้า
+          </a>
+          <a href="{% url 'repairs:status' %}" class="font-medium hover:text-red-600 transition {% if view == 'repairs:status' %}text-red-600{% else %}text-gray-600{% endif %}">สถานะซ่อม</a>
+          <a href="{% url 'repairs:new' %}" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full font-bold shadow-md transition-all transform hover:-translate-y-1">แจ้งซ่อม</a>
+        {% endif %}
+
+        <div class="border-l pl-6 ml-2 flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <div class="text-right hidden lg:block">
+              <div class="text-xs text-gray-400">เข้าสู่ระบบโดย</div>
+              <div class="text-sm font-bold text-gray-800">{{ user.first_name|default:user.username }}</div>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="ออกจากระบบ">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span class="font-medium text-sm hidden xl:inline">ออกจากระบบ</span>
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="font-medium text-gray-600 hover:text-red-600 transition text-sm">เข้าสู่ระบบ</a>
+            <a href="{% url 'accounts:register' %}" class="border border-red-600 text-red-600 hover:bg-red-50 px-4 py-1.5 rounded-full font-bold text-sm transition">สมัครสมาชิก</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Mobile button -->
+      <div class="md:hidden flex items-center gap-4">
+        {% if user.is_authenticated and user.role != "user" %}
+          <a href="{% url 'tech:notifications' %}" class="relative text-gray-600">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+            {% if unread_count %}<span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ unread_count }}</span>{% endif %}
+          </a>
+        {% endif %}
+        <button id="menu-btn" type="button" class="text-gray-600 hover:text-red-600" aria-label="เมนู">
+          <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 space-y-3 shadow-lg">
+    {% if user.is_authenticated and user.role != "user" %}
+      {% if user.role == "technician" %}
+        <a href="{% url 'tech:dashboard' %}" class="block w-full text-left py-2 font-medium text-gray-600">งานซ่อม</a>
+      {% else %}
+        <a href="{% url 'dashboard:manage' %}" class="block w-full text-left py-2 font-medium text-gray-600">จัดการงานซ่อม</a>
+        <a href="{% url 'tech:dashboard' %}" class="block w-full text-left py-2 font-medium text-gray-600">มุมมองช่าง</a>
+      {% endif %}
+      <a href="{% url 'inventory:list' %}" class="block w-full text-left py-2 font-medium text-gray-600">สต็อกอะไหล่</a>
+      <a href="{% url 'tech:notifications' %}" class="block w-full text-left py-2 font-medium text-gray-600">แจ้งเตือน{% if unread_count %} ({{ unread_count }}){% endif %}</a>
+    {% else %}
+      <a href="{% url 'home' %}" class="block w-full text-left py-2 font-medium text-gray-600">หน้าหลัก</a>
+      <a href="{% url 'shop:list' %}" class="block w-full text-left py-2 font-medium text-gray-600">สินค้าแนะนำ</a>
+      <a href="{% url 'repairs:status' %}" class="block w-full text-left py-2 font-medium text-gray-600">สถานะซ่อม</a>
+      <a href="{% url 'repairs:new' %}" class="block w-full text-center bg-red-600 text-white py-3 rounded-lg font-bold">แจ้งซ่อมออนไลน์</a>
+    {% endif %}
+    <div class="border-t pt-3 mt-2">
+      {% if user.is_authenticated %}
+        <div class="text-sm text-gray-500 mb-2">คุณ: {{ user.first_name|default:user.username }}</div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="text-red-600 text-sm font-bold flex items-center gap-2 w-full p-2 hover:bg-red-50 rounded-lg">
+            <i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="block py-2 font-medium text-gray-600">เข้าสู่ระบบ</a>
+        <a href="{% url 'accounts:register' %}" class="block py-2 font-bold text-red-600">สมัครสมาชิก</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+{% endwith %}

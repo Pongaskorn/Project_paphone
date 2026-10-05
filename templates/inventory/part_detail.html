@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}{{ part.name }} - สต็อกอะไหล่{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <a href="{% url 'inventory:list' %}" class="text-sm text-gray-500 hover:text-red-600 inline-flex items-center gap-1 mb-4">
+    <i data-lucide="chevron-left" class="w-4 h-4"></i> กลับรายการอะไหล่
+  </a>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="text-2xl font-bold text-gray-900">{{ part.name }}</h2>
+        <span class="text-xs px-2 py-1 rounded-full font-bold {{ part.stock_badge }}">{{ part.stock_label }}</span>
+        {% if not part.is_active %}<span class="text-xs px-2 py-1 rounded-full font-bold bg-gray-200 text-gray-600">ปิดใช้งาน</span>{% endif %}
+      </div>
+      <p class="text-gray-400 text-sm">{{ part.sku }} · {{ part.get_category_display }}</p>
+    </div>
+    {% if is_manager %}
+    <div class="flex gap-2">
+      <a href="{% url 'inventory:edit' part.pk %}" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-50 transition flex items-center gap-2"><i data-lucide="pencil" class="w-4 h-4"></i> แก้ไข</a>
+      <form method="post" action="{% url 'inventory:toggle' part.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-50 transition">{% if part.is_active %}ปิดใช้งาน{% else %}เปิดใช้งาน{% endif %}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-red-600"></i> ประวัติการเคลื่อนไหวสต็อก</h3>
+        {% for m in movements %}
+          <div class="flex items-start justify-between gap-3 py-3 {% if not forloop.last %}border-b border-gray-100{% endif %}">
+            <div class="text-sm">
+              <span class="text-xs px-2 py-0.5 rounded-full font-bold {{ m.badge_class }}">{{ m.get_movement_type_display }}</span>
+              {% if m.note %}<span class="text-gray-600 ml-1">{{ m.note }}</span>{% endif %}
+              <div class="text-xs text-gray-400 mt-1">
+                {{ m.created_by|default:"ระบบ" }} · {{ m.created_at|thai_date:"time" }}
+                {% if m.ticket %}· <a class="text-red-600 hover:underline" href="{% url 'tech:detail' m.ticket.pk %}">{{ m.ticket.ticket_code }}</a>{% endif %}
+              </div>
+            </div>
+            <div class="text-right whitespace-nowrap">
+              <div class="font-bold {% if m.change > 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ m.change|stringformat:"+d" }}</div>
+              <div class="text-xs text-gray-400">คงเหลือ {{ m.balance_after }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-sm text-gray-400">ยังไม่มีการเคลื่อนไหว</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="text-xs text-gray-400">คงเหลือ</div>
+        <div class="text-4xl font-bold text-gray-900">{{ part.quantity }} <span class="text-base font-medium text-gray-400">ชิ้น</span></div>
+        <dl class="space-y-3 text-sm mt-4">
+          <div><dt class="text-gray-400 text-xs">จุดสั่งซื้อ</dt><dd class="font-medium">แจ้งเตือนเมื่อเหลือ ≤ {{ part.min_quantity }}</dd></div>
+          <div><dt class="text-gray-400 text-xs">ตำแหน่งจัดเก็บ</dt><dd class="font-medium">{{ part.location|default:"-" }}</dd></div>
+          <div><dt class="text-gray-400 text-xs">รุ่นที่ใช้ได้</dt><dd class="font-medium">{{ part.compatible_models|default:"-" }}</dd></div>
+          <div><dt class="text-gray-400 text-xs">ราคาขาย</dt><dd class="font-medium">฿{{ part.sell_price|floatformat:"2g" }}</dd></div>
+          {% if is_manager %}<div><dt class="text-gray-400 text-xs">ราคาทุน</dt><dd class="font-medium">฿{{ part.cost_price|floatformat:"2g" }}</dd></div>{% endif %}
+        </dl>
+      </div>
+
+      {% if is_manager %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-green-600"></i> รับอะไหล่เข้าสต็อก</h3>
+        <form method="post" action="{% url 'inventory:receive' part.pk %}" class="space-y-3">
+          {% csrf_token %}
+          {% for field in receive_form %}
+            <div><label class="block text-xs font-medium text-gray-600 mb-1">{{ field.label }}</label>{{ field }}</div>
+          {% endfor %}
+          <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">รับเข้า</button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2"><i data-lucide="clipboard-check" class="w-4 h-4 text-amber-600"></i> ปรับยอด (ตรวจนับ)</h3>
+        <form method="post" action="{% url 'inventory:adjust' part.pk %}" class="space-y-3">
+          {% csrf_token %}
+          {% for field in adjust_form %}
+            <div><label class="block text-xs font-medium text-gray-600 mb-1">{{ field.label }}</label>{{ field }}</div>
+          {% endfor %}
+          <button type="submit" class="w-full bg-gray-900 text-white font-bold py-2 rounded-lg hover:bg-gray-800 transition">ปรับยอด</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

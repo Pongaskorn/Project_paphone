@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}แจ้งเตือน - PAPhone{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+      <i data-lucide="bell" class="w-6 h-6 text-red-600"></i> การแจ้งเตือน
+      {% if unread_count %}<span class="bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{{ unread_count }} ใหม่</span>{% endif %}
+    </h2>
+    {% if unread_count %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="text-sm font-bold text-gray-600 hover:text-red-600 transition">อ่านทั้งหมดแล้ว</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="space-y-3">
+    {% for n in items %}
+    <a href="{% url 'tech:notification_open' n.pk %}"
+       class="flex items-start gap-3 rounded-xl border p-4 transition hover:shadow-md {% if n.is_read %}bg-white border-gray-100{% else %}bg-red-50 border-red-200{% endif %}">
+      <div class="mt-1 shrink-0 {% if n.is_read %}text-gray-300{% else %}text-red-600{% endif %}"><i data-lucide="bell-ring" class="w-5 h-5"></i></div>
+      <div class="min-w-0">
+        <p class="text-sm text-gray-800 {% if not n.is_read %}font-bold{% endif %}">{{ n.message }}</p>
+        <p class="text-xs text-gray-400 mt-1">{{ n.created_at|thai_date:"time" }}</p>
+      </div>
+    </a>
+    {% empty %}
+    <div class="text-center py-16 bg-white rounded-xl border border-gray-100 text-gray-500">ยังไม่มีการแจ้งเตือน</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+<footer class="bg-gray-900 text-gray-300 py-12 mt-12 border-t border-gray-800">
+  <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+    <div>
+      <h3 class="text-white text-2xl font-bold mb-4 flex items-center justify-center md:justify-start gap-2">
+        <i data-lucide="wrench" class="w-6 h-6 text-red-500"></i> PAPhone
+      </h3>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        ศูนย์ซ่อมมือถือครบวงจร มาตรฐานสากล เราใส่ใจทุกรายละเอียด
+        เพื่อให้มือถือของคุณกลับมาใช้งานได้ดีดังเดิม
+      </p>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-4 uppercase tracking-wider">ติดต่อเรา</h4>
+      <ul class="space-y-2 text-sm">
+        <li class="flex items-center justify-center md:justify-start gap-2"><i data-lucide="phone" class="w-4 h-4"></i> 062-6303184</li>
+        <li class="flex items-center justify-center md:justify-start gap-2">Line: @PAPhone</li>
+        
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-4 uppercase tracking-wider">ที่ตั้งร้าน</h4>
+      <p class="text-sm text-gray-400">
+        7หมู่13 บ.ลิ้นไม้ ต.โพธิ์ใหญ่<br>
+        อ.วารินชำราบ จ.อุบลราชธานี<br>
+        34190
+      </p>
+    </div>
+  </div>
+  <div class="text-center text-gray-600 text-sm mt-12 border-t border-gray-800 pt-8">
+    &copy; 2025 PAPhone Mobile Repair. All rights reserved.
+    <div class="mt-3 flex justify-center gap-6">
+      <a href="{% url 'accounts:tech_login' %}" class="text-gray-500 hover:text-red-500 text-xs inline-flex items-center gap-1 transition">
+        <i data-lucide="wrench" class="w-3.5 h-3.5"></i> สำหรับช่าง
+      </a>
+      <a href="{% url 'accounts:admin_login' %}" class="text-gray-500 hover:text-red-500 text-xs inline-flex items-center gap-1 transition">
+        <i data-lucide="lock" class="w-3.5 h-3.5"></i> ผู้ดูแลระบบ / เจ้าของร้าน
+      </a>
+    </div>
+  </div>
+</footer>

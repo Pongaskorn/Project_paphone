@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+{% if user.is_authenticated and user.role == "user" %}
+<section class="bg-white border-b border-gray-100 py-8">
+  <div class="max-w-6xl mx-auto px-4">
+    <h1 class="text-2xl font-bold text-gray-900">สวัสดี, คุณ{{ user.first_name|default:user.username }} 👋</h1>
+    <p class="text-gray-500 text-sm">ยินดีต้อนรับกลับสู่ PAPhone</p>
+  </div>
+</section>
+{% endif %}
+
+<!-- Hero -->
+<section class="bg-gradient-to-r from-red-50 to-white py-12">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
+    <div class="flex-1">
+      <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
+        มือถือมีปัญหา? <span class="text-red-600">เราช่วยได้</span>
+      </h2>
+      <p class="text-gray-600 mb-6">
+        เช็คสถานะการซ่อมของคุณได้ทันที หรือเลือกซื้ออุปกรณ์เสริมคุณภาพดีที่เราคัดสรรมาให้
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="{% url 'repairs:new' %}" class="bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-red-700 transition flex items-center gap-2">
+          <i data-lucide="wrench" class="w-[18px] h-[18px]"></i> แจ้งซ่อมใหม่
+        </a>
+        <a href="{% url 'repairs:status' %}" class="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition flex items-center gap-2">
+          <i data-lucide="search" class="w-[18px] h-[18px]"></i> งานซ่อมของฉัน
+        </a>
+      </div>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <div class="grid grid-cols-2 gap-4">
+        <a href="{% url 'shop:list' %}" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition text-center">
+          <i data-lucide="shopping-bag" class="w-8 h-8 mx-auto text-red-500 mb-2"></i>
+          <div class="font-bold text-gray-800">ร้านค้า</div>
+        </a>
+        <a href="{% url 'repairs:status' %}" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition text-center">
+          <i data-lucide="clock" class="w-8 h-8 mx-auto text-blue-500 mb-2"></i>
+          <div class="font-bold text-gray-800">สถานะ</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="py-12 bg-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <h3 class="text-xl font-bold text-gray-900 mb-6">บริการของเรา</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
+        <i data-lucide="smartphone" class="w-6 h-6 mx-auto text-red-600 mb-2"></i>
+        <div class="font-bold text-sm">เปลี่ยนจอ</div>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
+        <i data-lucide="battery" class="w-6 h-6 mx-auto text-red-600 mb-2"></i>
+        <div class="font-bold text-sm">เปลี่ยนแบต</div>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
+        <i data-lucide="droplets" class="w-6 h-6 mx-auto text-red-600 mb-2"></i>
+        <div class="font-bold text-sm">ซ่อมตกน้ำ</div>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
+        <i data-lucide="cpu" class="w-6 h-6 mx-auto text-red-600 mb-2"></i>
+        <div class="font-bold text-sm">ซ่อมบอร์ด</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

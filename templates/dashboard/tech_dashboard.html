@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}งานซ่อม - PAPhone{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+      <div class="bg-gray-900 text-white p-2 rounded"><i data-lucide="wrench" class="w-6 h-6"></i></div>
+      งานซ่อม
+    </h2>
+    <div class="flex gap-2">
+      <a href="{% url 'tech:notifications' %}" class="relative bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-50 transition flex items-center gap-2">
+        <i data-lucide="bell" class="w-4 h-4"></i> แจ้งเตือน
+        {% if unread_count %}<span class="bg-red-600 text-white text-[10px] rounded-full px-1.5 py-0.5">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'tech:create' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 transition">+ เพิ่มงานซ่อม</a>
+    </div>
+  </div>
+
+  <form method="get" class="mb-4 flex gap-2">
+    {% if current %}<input type="hidden" name="status" value="{{ current }}">{% endif %}
+    <input type="text" name="q" value="{{ q }}" placeholder="ค้นหา ชื่อลูกค้า / เบอร์ / รุ่นเครื่อง / รหัสงาน"
+           class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 outline-none transition">
+    <button type="submit" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition"><i data-lucide="search" class="w-[18px] h-[18px]"></i></button>
+  </form>
+
+  <div class="flex overflow-x-auto gap-2 pb-2 mb-4 no-scrollbar">
+    <a href="?{% if q %}q={{ q }}{% endif %}"
+       class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition {% if not current %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+      ทั้งหมด ({{ total }})
+    </a>
+    {% for s in stats %}
+      <a href="?status={{ s.value }}{% if q %}&q={{ q }}{% endif %}"
+         class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition {% if current == s.value %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+        {{ s.label }} ({{ s.count }})
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="space-y-3">
+    {% for t in tickets %}
+    <a href="{% url 'tech:detail' t.pk %}"
+       class="block bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition p-5 border-l-4 {% if t.status == 'new' %}border-l-yellow-400{% else %}border-l-gray-200{% endif %}">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <span class="font-bold text-lg text-gray-900">{{ t.device_model }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-bold {{ t.badge_class }}">{{ t.get_status_display }}</span>
+            <span class="text-xs text-gray-400">{{ t.ticket_code }}</span>
+          </div>
+          <p class="text-gray-600 text-sm line-clamp-2">{{ t.symptom }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ t.customer_name }} · {{ t.customer_phone }} · {{ t.created_at|thai_date:"time" }}</p>
+        </div>
+        <span class="text-red-600 text-sm font-bold whitespace-nowrap flex items-center gap-1">ดูรายละเอียด <i data-lucide="chevron-right" class="w-4 h-4"></i></span>
+      </div>
+    </a>
+    {% empty %}
+    <div class="text-center py-16 bg-white rounded-xl border border-gray-100 text-gray-500">ไม่มีรายการซ่อมในขณะนี้</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
