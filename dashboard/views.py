@@ -21,7 +21,7 @@ def _back(request):
 @manager_required
 def manage(request):
     current = request.GET.get("status", "")
-    tickets = RepairTicket.objects.all()
+    tickets = RepairTicket.objects.prefetch_related("photos")
     if current in RepairTicket.Status.values:
         tickets = tickets.filter(status=current)
     else:

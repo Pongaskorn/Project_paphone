@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load thai %}
+{% block title %}บัญชีร้าน - PAPhone{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+      <div class="bg-red-600 text-white p-2 rounded"><i data-lucide="wallet" class="w-6 h-6"></i></div>
+      บัญชีร้าน
+    </h2>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'accounting:create' 'income' %}" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700 transition">+ บันทึกรายรับ</a>
+      <a href="{% url 'accounting:create' 'expense' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 transition">+ บันทึกรายจ่าย</a>
+      <a href="{% url 'accounting:export' %}?{{ export_qs }}" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-50 transition flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> CSV</a>
+    </div>
+  </div>
+
+  <!-- เลือกเดือน -->
+  <div class="flex flex-wrap items-center gap-2 mb-4">
+    {% if prev_month %}<a href="?month={{ prev_month }}" class="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50" title="เดือนก่อนหน้า"><i data-lucide="chevron-left" class="w-4 h-4"></i></a>{% endif %}
+    <span class="px-4 py-2 rounded-lg bg-gray-900 text-white font-bold text-sm">{{ f.label }}</span>
+    {% if next_month %}<a href="?month={{ next_month }}" class="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50" title="เดือนถัดไป"><i data-lucide="chevron-right" class="w-4 h-4"></i></a>{% endif %}
+    {% if f.key != this_month %}<a href="?month={{ this_month }}" class="text-sm font-bold text-red-600 hover:underline ml-2">เดือนนี้</a>{% endif %}
+    {% if f.key != "all" %}<a href="?month=all" class="text-sm text-gray-500 hover:text-red-600 ml-2">ดูทั้งหมด</a>{% endif %}
+  </div>
+
+  <!-- สรุป -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+    <div class="bg-white rounded-xl border border-green-200 p-5">
+      <div class="text-xs text-green-700 font-bold">รายรับ</div>
+      <div class="text-3xl font-bold text-green-600">฿{{ totals.income|floatformat:"2g" }}</div>
+    </div>
+    <div class="bg-white rounded-xl border border-red-200 p-5">
+      <div class="text-xs text-red-600 font-bold">รายจ่าย</div>
+      <div class="text-3xl font-bold text-red-600">฿{{ totals.expense|floatformat:"2g" }}</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="text-xs text-gray-500 font-bold">{% if totals.profit >= 0 %}กำไรสุทธิ{% else %}ขาดทุนสุทธิ{% endif %}</div>
+      <div class="text-3xl font-bold {% if totals.profit >= 0 %}text-gray-900{% else %}text-red-600{% endif %}">฿{{ totals.profit|floatformat:"2g" }}</div>
+    </div>
+  </div>
+
+  <!-- แยกตามหมวด + แนวโน้ม -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="font-bold text-gray-900 mb-3 text-sm">รายรับแยกตามหมวด</h3>
+      {% for c in income_breakdown %}
+        <div class="mb-3">
+          <div class="flex justify-between text-sm"><span class="text-gray-700">{{ c.label }}</span><span class="font-bold">฿{{ c.total|floatformat:"2g" }}</span></div>
+          <div class="h-2 bg-gray-100 rounded-full mt-1"><div class="h-2 bg-green-500 rounded-full" style="width: {{ c.percent }}%"></div></div>
+        </div>
+      {% empty %}<p class="text-sm text-gray-400">ไม่มีรายรับ</p>{% endfor %}
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="font-bold text-gray-900 mb-3 text-sm">รายจ่ายแยกตามหมวด</h3>
+      {% for c in expense_breakdown %}
+        <div class="mb-3">
+          <div class="flex justify-between text-sm"><span class="text-gray-700">{{ c.label }}</span><span class="font-bold">฿{{ c.total|floatformat:"2g" }}</span></div>
+          <div class="h-2 bg-gray-100 rounded-full mt-1"><div class="h-2 bg-red-500 rounded-full" style="width: {{ c.percent }}%"></div></div>
+        </div>
+      {% empty %}<p class="text-sm text-gray-400">ไม่มีรายจ่าย</p>{% endfor %}
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="font-bold text-gray-900 mb-3 text-sm">ย้อนหลัง 6 เดือน</h3>
+      {% for m in trend %}
+        <div class="mb-3">
+          <div class="flex justify-between text-xs text-gray-500"><span>{{ m.label }}</span><span class="font-bold {% if m.profit >= 0 %}text-gray-700{% else %}text-red-600{% endif %}">{{ m.profit|floatformat:"0g" }}</span></div>
+          <div class="h-1.5 bg-gray-100 rounded-full mt-1"><div class="h-1.5 bg-green-500 rounded-full" style="width: {{ m.income_w }}%"></div></div>
+          <div class="h-1.5 bg-gray-100 rounded-full mt-1"><div class="h-1.5 bg-red-500 rounded-full" style="width: {{ m.expense_w }}%"></div></div>
+        </div>
+      {% endfor %}
+      <p class="text-[11px] text-gray-400">เขียว = รายรับ · แดง = รายจ่าย · ตัวเลข = กำไร (บาท)</p>
+    </div>
+  </div>
+
+  <!-- ค้นหา/กรอง -->
+  <form method="get" class="mb-4 flex flex-wrap gap-2">
+    <input type="hidden" name="month" value="{{ f.key }}">
+    <input type="text" name="q" value="{{ f.q }}" placeholder="ค้นหารายละเอียด / รหัสงานซ่อม"
+           class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 outline-none transition">
+    <select name="type" class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white outline-none focus:ring-2 focus:ring-red-500">
+      <option value="">รายรับ+รายจ่าย</option>
+      {% for value, label in types %}<option value="{{ value }}" {% if f.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="cat" class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white outline-none focus:ring-2 focus:ring-red-500">
+      <option value="">ทุกหมวด</option>
+      {% for value, label in categories %}<option value="{{ value }}" {% if f.cat == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition"><i data-lucide="search" class="w-[18px] h-[18px]"></i></button>
+  </form>
+
+  <!-- รายการ -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="p-4 font-semibold text-gray-600">วันที่</th>
+            <th class="p-4 font-semibold text-gray-600">รายการ</th>
+            <th class="p-4 font-semibold text-gray-600">หมวดหมู่</th>
+            <th class="p-4 font-semibold text-gray-600 text-right">จำนวนเงิน</th>
+            <th class="p-4"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for t in page %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-4 text-sm text-gray-500 whitespace-nowrap">{{ t.date|thai_date }}</td>
+            <td class="p-4">
+              <div class="text-gray-900">{{ t.description|default:"-" }}</div>
+              <div class="text-xs text-gray-400">
+                {% if t.ticket %}<a class="text-red-600 hover:underline" href="{% url 'tech:detail' t.ticket.pk %}">{{ t.ticket.ticket_code }}</a> · {% endif %}
+                {% if t.source != "manual" %}{{ t.get_source_display }} · {% endif %}{{ t.created_by|default:"ระบบ" }}
+              </div>
+            </td>
+            <td class="p-4"><span class="text-xs px-2 py-1 rounded-full font-bold whitespace-nowrap {{ t.badge_class }}">{{ t.get_category_display }}</span></td>
+            <td class="p-4 text-right font-bold whitespace-nowrap {{ t.amount_class }}">{% if t.is_income %}+{% else %}−{% endif %}฿{{ t.amount|floatformat:"2g" }}</td>
+            <td class="p-4 text-right whitespace-nowrap">
+              <a href="{% url 'accounting:edit' t.pk %}" class="text-sm font-bold text-gray-500 hover:text-red-600 mr-2">แก้ไข</a>
+              <form method="post" action="{% url 'accounting:delete' t.pk %}" class="inline" onsubmit="return confirm('ต้องการลบรายการนี้ใช่หรือไม่?')">
+                {% csrf_token %}
+                <button type="submit" class="text-gray-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition align-middle" title="ลบรายการ"><i data-lucide="trash-2" class="w-[18px] h-[18px]"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="p-8 text-center text-gray-500">ไม่มีรายการในช่วงนี้</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if page.paginator.num_pages > 1 %}
+  <div class="flex justify-center items-center gap-4 mt-4 text-sm">
+    {% if page.has_previous %}<a class="text-red-600 font-bold" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.previous_page_number }}">← ก่อนหน้า</a>{% endif %}
+    <span class="text-gray-500">หน้า {{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="text-red-600 font-bold" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.next_page_number }}">ถัดไป →</a>{% endif %}
+  </div>
+  {% endif %}
+  <p class="mt-4 text-xs text-gray-400">* ยอดสรุปด้านบนนับทุกรายการของช่วงเวลาที่เลือก ส่วนตารางจะแสดงตามตัวกรอง</p>
+</div>
+{% endblock %}

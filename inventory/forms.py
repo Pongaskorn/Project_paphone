@@ -47,6 +47,7 @@ class ReceiveForm(forms.Form):
         label="หมายเหตุ", required=False, max_length=200,
         widget=forms.TextInput(attrs={"class": INPUT, "placeholder": "เช่น ซื้อจากร้าน ABC"}),
     )
+    record_expense = forms.BooleanField(label="บันทึกเป็นรายจ่ายในบัญชีร้าน (จำนวน × ราคาทุน)", required=False, initial=True)
 
 
 class AdjustForm(forms.Form):

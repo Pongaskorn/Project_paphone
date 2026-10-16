@@ -42,6 +42,14 @@
         {% endif %}
       </div>
 
+      <!-- รูปที่ลูกค้าแนบ -->
+      {% if ticket.photos.all %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-bold text-gray-900 flex items-center gap-2"><i data-lucide="image" class="w-5 h-5 text-red-600"></i> รูปที่ลูกค้าแนบ</h3>
+        {% include "repairs/_photos.html" with obj=ticket %}
+      </div>
+      {% endif %}
+
       <!-- แจ้งสถานะ -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h3 class="font-bold text-gray-900 mb-1 flex items-center gap-2"><i data-lucide="send" class="w-5 h-5 text-red-600"></i> แจ้งสถานะการซ่อม</h3>
@@ -62,6 +70,10 @@
       </div>
 
       {% include "inventory/_ticket_parts.html" %}
+
+      {% if user.role == "owner" %}
+        {% include "accounting/_ticket_finance.html" %}
+      {% endif %}
 
       <!-- ประวัติ -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

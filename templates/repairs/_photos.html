@@ -1,0 +1,12 @@
+{% with photos=obj.photos.all %}
+  {% if photos %}
+    <div class="flex flex-wrap gap-2 mt-3">
+      {% for p in photos %}
+        <a href="{% url 'repairs:photo' p.pk %}" target="_blank" rel="noopener" title="เปิดดูรูปเต็ม">
+          <img src="{% url 'repairs:photo' p.pk %}" alt="รูปอาการเสีย {{ forloop.counter }}" loading="lazy"
+               class="w-20 h-20 object-cover rounded-lg border border-gray-200 hover:ring-2 hover:ring-red-400 transition">
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

@@ -1,10 +1,12 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from accounting.models import Transaction
 from accounts.decorators import role_required
 from repairs.models import RepairTicket
 from repairs.services import MANAGER_ROLES, STAFF_ROLES
@@ -116,7 +118,20 @@ def part_receive(request, pk):
     form = ReceiveForm(request.POST)
     if form.is_valid():
         d = form.cleaned_data
-        receive_stock(part, d["quantity"], request.user, d["note"], d["cost_price"])
+        unit_cost = d["cost_price"] if d["cost_price"] is not None else part.cost_price
+        with transaction.atomic():
+            receive_stock(part, d["quantity"], request.user, d["note"], d["cost_price"])
+            total = unit_cost * d["quantity"]
+            if d["record_expense"] and total > 0:
+                Transaction.objects.create(
+                    type=Transaction.Type.EXPENSE,
+                    category=Transaction.Category.PARTS,
+                    amount=total,
+                    date=timezone.localdate(),
+                    description=f"ซื้ออะไหล่ {part.name} × {d['quantity']}"[:200],
+                    source=Transaction.Source.STOCK,
+                    created_by=request.user,
+                )
         messages.success(request, f"รับ {part.name} เข้าสต็อก {d['quantity']} ชิ้นแล้ว")
     else:
         messages.error(request, "ข้อมูลไม่ถูกต้อง: กรุณากรอกจำนวนที่รับเข้าให้ถูกต้อง")

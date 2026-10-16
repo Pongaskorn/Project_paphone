@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}แจ้งซ่อมออนไลน์ - PhoneFix{% endblock %}
+{% block title %}แจ้งซ่อมออนไลน์ - PAPhone{% endblock %}
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-8">
   <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
@@ -7,20 +7,15 @@
       <i data-lucide="wrench" class="w-6 h-6 text-red-600"></i> แจ้งซ่อมออนไลน์
     </h2>
 
-    <form method="post" class="space-y-4">
+    <!-- ข้อมูลผู้แจ้ง: ดึงจากบัญชีที่ login -->
+    <div class="mb-6 rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-1">
+      <div class="flex items-center gap-2 text-sm"><i data-lucide="user" class="w-4 h-4 text-gray-400"></i><span class="font-bold text-gray-900">{{ display_name }}</span></div>
+      <div class="flex items-center gap-2 text-sm text-gray-600"><i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>{{ display_phone|default:"ยังไม่ได้ระบุเบอร์โทร" }}</div>
+      <span class="text-xs text-gray-400">ข้อมูลจากบัญชีของคุณ</span>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
       {% csrf_token %}
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="{{ form.customer_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">ชื่อของคุณ</label>
-          {{ form.customer_name }}
-          {% for e in form.customer_name.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
-        </div>
-        <div>
-          <label for="{{ form.customer_phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-          {{ form.customer_phone }}
-          {% for e in form.customer_phone.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
-        </div>
-      </div>
 
       <div>
         <label for="{{ form.device_model.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">รุ่นมือถือ</label>
@@ -34,10 +29,46 @@
         {% for e in form.symptom.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
       </div>
 
+      <div>
+        <label for="{{ form.photos.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ form.photos.label }}</label>
+        {{ form.photos }}
+        <p class="text-xs text-gray-400 mt-1">{{ form.photos.help_text }}</p>
+        <p id="photo-hint" class="text-xs text-red-500 mt-1"></p>
+        {% for e in form.photos.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+        <div id="photo-preview" class="flex flex-wrap gap-2 mt-3"></div>
+      </div>
+
       <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition flex justify-center items-center gap-2 mt-4">
         <i data-lucide="save" class="w-5 h-5"></i> ยืนยันการแจ้งซ่อม
       </button>
     </form>
   </div>
 </div>
+
+<script>
+  // แสดงตัวอย่างรูปก่อนส่ง และเตือนถ้าเลือกเกิน 3 รูป (ฝั่งเซิร์ฟเวอร์ตรวจซ้ำอีกครั้งเสมอ)
+  (function () {
+    var input = document.getElementById("id_photos");
+    var box = document.getElementById("photo-preview");
+    var hint = document.getElementById("photo-hint");
+    if (!input) return;
+    input.addEventListener("change", function () {
+      box.innerHTML = "";
+      hint.textContent = "";
+      var files = Array.prototype.slice.call(input.files);
+      if (files.length > 3) {
+        hint.textContent = "เลือกได้ไม่เกิน 3 รูป กรุณาเลือกใหม่";
+        input.value = "";
+        return;
+      }
+      files.forEach(function (f) {
+        var img = document.createElement("img");
+        img.src = URL.createObjectURL(f);
+        img.className = "w-24 h-24 object-cover rounded-lg border border-gray-200";
+        box.appendChild(img);
+      });
+      if (files.length < 2) hint.textContent = "กรุณาแนบอย่างน้อย 2 รูป";
+    });
+  })();
+</script>
 {% endblock %}

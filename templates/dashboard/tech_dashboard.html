@@ -47,6 +47,7 @@
             <span class="font-bold text-lg text-gray-900">{{ t.device_model }}</span>
             <span class="text-xs px-2 py-0.5 rounded-full font-bold {{ t.badge_class }}">{{ t.get_status_display }}</span>
             <span class="text-xs text-gray-400">{{ t.ticket_code }}</span>
+            {% with n=t.photos.all|length %}{% if n %}<span class="text-xs text-gray-500 inline-flex items-center gap-1"><i data-lucide="camera" class="w-3.5 h-3.5"></i>{{ n }}</span>{% endif %}{% endwith %}
           </div>
           <p class="text-gray-600 text-sm line-clamp-2">{{ t.symptom }}</p>
           <p class="text-gray-400 text-xs mt-1">{{ t.customer_name }} · {{ t.customer_phone }} · {{ t.created_at|thai_date:"time" }}</p>

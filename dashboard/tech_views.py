@@ -43,7 +43,7 @@ def dashboard(request):
     return render(
         request,
         "dashboard/tech_dashboard.html",
-        {"tickets": tickets, "stats": stats, "total": sum(counts.values()), "current": current, "q": q},
+        {"tickets": tickets.prefetch_related("photos"), "stats": stats, "total": sum(counts.values()), "current": current, "q": q},
     )
 
 

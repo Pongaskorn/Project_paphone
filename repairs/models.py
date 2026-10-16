@@ -1,3 +1,5 @@
+import uuid
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -107,3 +109,22 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+
+
+def ticket_photo_path(instance, filename):
+    # ตั้งชื่อไฟล์เป็นเลขสุ่ม เดาลิงก์ไม่ได้ และไม่เอาชื่อไฟล์เดิมของลูกค้ามาใช้
+    return f"tickets/{instance.ticket_id}/{uuid.uuid4().hex}.jpg"
+
+
+class TicketPhoto(models.Model):
+    """รูปที่ลูกค้าแนบตอนแจ้งซ่อม (ดูได้เฉพาะเจ้าของงานและพนักงาน)"""
+
+    ticket = models.ForeignKey(RepairTicket, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to=ticket_photo_path)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.ticket_id}: {self.image.name}"

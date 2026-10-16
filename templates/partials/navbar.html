@@ -17,6 +17,7 @@
           {% else %}
             <a href="{% url 'dashboard:manage' %}" class="font-medium hover:text-red-600 transition {% if view == 'dashboard:manage' %}text-red-600{% else %}text-gray-600{% endif %}">จัดการงานซ่อม</a>
             <a href="{% url 'tech:dashboard' %}" class="font-medium hover:text-red-600 transition {% if view == 'tech:dashboard' %}text-red-600{% else %}text-gray-600{% endif %}">มุมมองช่าง</a>
+            {% if user.role == "owner" %}<a href="{% url 'accounting:ledger' %}" class="font-medium hover:text-red-600 transition {% if view|slice:":11" == 'accounting:' %}text-red-600{% else %}text-gray-600{% endif %}">บัญชีร้าน</a>{% endif %}
           {% endif %}
           <a href="{% url 'inventory:list' %}" class="font-medium hover:text-red-600 transition {% if view|slice:":10" == 'inventory:' %}text-red-600{% else %}text-gray-600{% endif %}">สต็อกอะไหล่</a>
           <a href="{% url 'tech:notifications' %}" class="relative text-gray-600 hover:text-red-600 transition" title="แจ้งเตือน">
@@ -75,6 +76,7 @@
       {% else %}
         <a href="{% url 'dashboard:manage' %}" class="block w-full text-left py-2 font-medium text-gray-600">จัดการงานซ่อม</a>
         <a href="{% url 'tech:dashboard' %}" class="block w-full text-left py-2 font-medium text-gray-600">มุมมองช่าง</a>
+        {% if user.role == "owner" %}<a href="{% url 'accounting:ledger' %}" class="block w-full text-left py-2 font-medium text-gray-600">บัญชีร้าน</a>{% endif %}
       {% endif %}
       <a href="{% url 'inventory:list' %}" class="block w-full text-left py-2 font-medium text-gray-600">สต็อกอะไหล่</a>
       <a href="{% url 'tech:notifications' %}" class="block w-full text-left py-2 font-medium text-gray-600">แจ้งเตือน{% if unread_count %} ({{ unread_count }}){% endif %}</a>

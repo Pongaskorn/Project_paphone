@@ -1,0 +1,14 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+  <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-red-600"></i> การเงินของงานนี้</h3>
+  {% for t in ticket.transactions.all %}
+    <div class="flex justify-between text-sm py-2 border-b border-gray-100">
+      <span class="text-gray-700">{{ t.get_category_display }}{% if t.description %} · {{ t.description }}{% endif %}</span>
+      <span class="font-bold {{ t.amount_class }}">฿{{ t.amount|floatformat:"2g" }}</span>
+    </div>
+  {% empty %}
+    <p class="text-sm text-gray-400 mb-2">ยังไม่ได้บันทึกรายรับของงานนี้</p>
+  {% endfor %}
+  <a href="{% url 'accounting:create' 'income' %}?ticket={{ ticket.ticket_code }}{% if parts_total %}&amount={{ parts_total|stringformat:"s" }}{% endif %}"
+     class="mt-3 inline-block bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700 transition">+ บันทึกรับเงินงานนี้</a>
+  {% if parts_total %}<p class="text-[11px] text-gray-400 mt-2">ยอดที่เติมให้คือค่าอะไหล่ ปรับเพิ่มค่าแรงได้ในหน้าถัดไป</p>{% endif %}
+</div>

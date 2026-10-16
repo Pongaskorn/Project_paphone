@@ -48,7 +48,8 @@
               <div class="text-sm text-gray-500">{{ t.customer_phone }}</div>
             </td>
             <td class="p-4">
-              <div class="font-bold text-gray-800">{{ t.device_model }}</div>
+              <div class="font-bold text-gray-800">{{ t.device_model }}
+                {% with n=t.photos.all|length %}{% if n %}<span class="ml-1 text-xs font-normal text-gray-500 inline-flex items-center gap-1"><i data-lucide="camera" class="w-3.5 h-3.5"></i>{{ n }}</span>{% endif %}{% endwith %}</div>
               <div class="text-sm text-gray-600 truncate max-w-xs" title="{{ t.symptom }}">{{ t.symptom }}</div>
               {% if t.note %}<div class="text-xs text-amber-700 truncate max-w-xs mt-0.5" title="{{ t.note }}">📝 {{ t.note }}</div>{% endif %}
             </td>

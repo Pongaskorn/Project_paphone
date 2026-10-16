@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load thai %}
-{% block title %}สถานะงานซ่อม - PhoneFix{% endblock %}
+{% block title %}สถานะงานซ่อม - PAPhone{% endblock %}
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-6">
@@ -29,6 +29,7 @@
           </div>
           <p class="text-gray-600 text-sm">{{ t.symptom }}</p>
           <p class="text-gray-400 text-xs mt-1">รหัส: {{ t.ticket_code }} · วันที่: {{ t.created_at|thai_date }}</p>
+          {% include "repairs/_photos.html" with obj=t %}
         </div>
         <div class="w-full md:w-32 bg-gray-100 h-2 rounded-full overflow-hidden">
           <div class="h-full {{ t.bar_class }}" style="width: {{ t.progress }}%"></div>
